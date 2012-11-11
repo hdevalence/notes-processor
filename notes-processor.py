@@ -4,15 +4,18 @@
 # photos of paper with writing on them into duotone images.
 
 import sys
-import cv
+import cv2
+import numpy as np
 
 def processImage(fname):
-	source = cv.LoadImageM(fname,cv.CV_LOAD_IMAGE_GRAYSCALE)
-	output = cv.CreateImage(cv.GetSize(source),cv.IPL_DEPTH_8U,1)
+	source = cv2.imread(fname,cv2.CV_LOAD_IMAGE_GRAYSCALE)
 	# Posterize the image using adaptive thresholding with
 	# a fairly large neighbourhood.
-	cv.AdaptiveThreshold(source,output,255,blockSize=11,param1=12)
-	cv.SaveImage("p_%s.png" %fname, output)
+	output = cv2.adaptiveThreshold(source, 255,
+	                               cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+	                               cv2.THRESH_BINARY,
+	                               11, 12)
+	cv2.imwrite("p_%s.png" %fname, output)
 
 if __name__ == "__main__":
 	map(processImage,sys.argv[1:])
