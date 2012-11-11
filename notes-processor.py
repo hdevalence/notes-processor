@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 # Python script to automatically convert poor-quality 
 # photos of paper with writing on them into duotone images.
