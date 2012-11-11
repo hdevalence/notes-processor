@@ -23,32 +23,25 @@ def findSquares(image):
 	squares = []
 	# Blur image to emphasize bigger features.
 	blur = cv2.blur(image,(2,2))
-	# Use a bunch of different thresholds to try to find squares
-	for t in xrange(0,255,32):
-		#cdraw = 255*np.ones(blur.shape)
-		if t == 0:
-			# Find edges.
-			edges = cv2.Canny(blur,10,20)
-			edges = cv2.dilate(edges,np.ones((3,3),'int'))
-		else:
-			retval, edges = cv2.threshold(blur,t,255,
-			                        cv2.THRESH_BINARY)
-		contours, hierarchy = cv2.findContours(edges, 
-		                                cv2.RETR_LIST,
-		                                cv2.CHAIN_APPROX_SIMPLE)
-		#cv2.drawContours(cdraw,contours,-1,(255,0,0),thickness=5)
-		for c in contours:
-			clen = cv2.arcLength(c,True)
-			c = cv2.approxPolyDP(c,0.02*clen,True)
-			#cv2.drawContours(cdraw,[c],-1,(0,0,255),thickness=5)
-			area = abs(cv2.contourArea(c))
-			if len(c) == 4 and \
-			   0.1*edges.size <= area <= 0.9*edges.size and \
-			   cv2.isContourConvex(c):
-				# Omit angle check.
-				squares.append(c)
-		#cv2.imwrite("tmp_%d.png" % t, edges)
-		#cv2.imwrite("tmp_%d_b.png" % t, cdraw)
+	retval, edges = cv2.threshold(blur,0,255,
+	                    cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+	#cv2.imwrite("tmp.png", edges)
+	contours, hierarchy = cv2.findContours(edges,
+	                                cv2.RETR_LIST,
+	                                cv2.CHAIN_APPROX_SIMPLE)
+	#cdraw = np.zeros(blur.shape)
+	#cv2.drawContours(cdraw,contours,-1,(255,0,0),thickness=5)
+	for c in contours:
+		clen = cv2.arcLength(c,True)
+		c = cv2.approxPolyDP(c,0.02*clen,True)
+		#cv2.drawContours(cdraw,[c],-1,(0,0,255),thickness=5)
+		area = abs(cv2.contourArea(c))
+		if len(c) == 4 and \
+		   0.1*edges.size <= area <= 0.9*edges.size and \
+		   cv2.isContourConvex(c):
+			# Omit angle check.
+			squares.append(c)
+	#cv2.imwrite("tmp__b.png", cdraw)
 	return squares
 
 def warpSheet(image):
