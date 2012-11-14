@@ -13,10 +13,10 @@ Todo
 ----
 
 1.  The dewarping is somewhat broken, in the following ways:
-    *   It sometimes can't figure out which corners are which,
-        leading to flipped/skewed images.
     *   It assumes that the sheet will *always* be on a
         differently-coloured background, which may not be true.
+    *   It assumes that the sheet is 8.5*11 instead of
+        trying to determine its true aspect ratio.
 
 2.  The file handling is really brittle and only works enough to
     test the image processing.
