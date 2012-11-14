@@ -16,7 +16,7 @@ def processImage(fname):
 	output = cv2.adaptiveThreshold(source, 255,
 	                               cv2.ADAPTIVE_THRESH_MEAN_C,
 	                               cv2.THRESH_BINARY,
-	                               19, 8)
+	                               19, 12)
 	cv2.imwrite("p_%s.png" %fname, output)
 
 def findSquares(image):
