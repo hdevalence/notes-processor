@@ -40,37 +40,38 @@ def bitone(image):
                                    NBHD_SIZE, ADAPT_T)
     return thresh
 
-def findSquares(image):
+def findPaper(image):
+    '''
+    Try to find a sheet of paper contained in the image.
+    Return the contour or raise ValueError if none found.
+    '''
     squares = []
     # Blur image to emphasize bigger features.
     blur = cv2.blur(image,(2,2))
     retval, edges = cv2.threshold(blur,0,255,
                         cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    #cv2.imwrite("tmp.png", edges)
     contours, hierarchy = cv2.findContours(edges,
                                     cv2.RETR_LIST,
                                     cv2.CHAIN_APPROX_SIMPLE)
-    #cdraw = np.zeros(blur.shape)
-    #cv2.drawContours(cdraw,contours,-1,(255,0,0),thickness=5)
     for c in contours:
         clen = cv2.arcLength(c,True)
         c = cv2.approxPolyDP(c,0.02*clen,True)
-        #cv2.drawContours(cdraw,[c],-1,(0,0,255),thickness=5)
         area = abs(cv2.contourArea(c))
         if len(c) == 4 and \
            0.1*edges.size <= area <= 0.9*edges.size and \
            cv2.isContourConvex(c):
-            squares.append(c)
-    #cv2.imwrite("tmp__b.png", cdraw)
-    return squares
-
+                squares.append(c)
+    return max(squares,key=lambda s: cv2.arcLength(s,True))
 
 def warpSheet(image):
+    '''
+    Automatically crops an image to paper size if possible.
+    '''
+    try:
+        sheet = findPaper(image)
+    except ValueError:
+        return image
     h, w = image.shape
-    squares = findSquares(image)
-    sheet = max(squares,key=lambda s: cv2.arcLength(s,True))
-    #We don't know how the points of the square we found are ordered. 
-    #So we just study it out, and we'll see.
     src = sheet[::,0,::].astype('float32')
     # Compute distances from topleft corner (0,0)
     # to find topleft and bottomright
@@ -84,7 +85,10 @@ def warpSheet(image):
     t_r = np.argmin(d)
     b_l = np.argmax(d)
     #Now assemble these together
-    destH, destW = h, int(h*8.5/11.0)
+    if h >= w:
+        destH, destW = h, int(h*8.5/11.0)
+    else:
+        destW, destH = h, int(h*8.5/11.0)
     dest = np.zeros(src.shape,dtype='float32')
     dest[t_l] = np.array([0,0])
     dest[t_r] = np.array([destW,0])
