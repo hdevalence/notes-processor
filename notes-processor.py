@@ -9,17 +9,36 @@ import numpy as np
 import os.path
 from itertools import starmap
 
+NBHD_SIZE = 19
+UNSHARP_T = 48
+ADAPT_T   = 24
+
 def processImage(fname):
     print "Processing %s" % fname
     source = cv2.imread(fname,cv2.CV_LOAD_IMAGE_GRAYSCALE)
-    source = warpSheet(source)
-    # Posterize the image using adaptive thresholding with
-    # a fairly large neighbourhood.
-    output = cv2.adaptiveThreshold(source, 255,
+    return bitone(warpSheet(source))
+
+def bitone(image):
+    '''
+    Convert a greyscale image to a bitone image,
+    in such a way that we preserve as much detail as possible,
+    and have the least amount of speckles.
+    '''
+    # First, sharpen the image: unsharp mask w/ threshold.
+    blur = cv2.blur(image,(NBHD_SIZE,NBHD_SIZE))
+    diff = cv2.absdiff(image,blur)
+    # Apparently OpenCV doesn't have a way to
+    # apply a mask to a weighted sum, so we do it ourselves.
+    _,mask = cv2.threshold(blur,UNSHARP_T,1,cv2.THRESH_BINARY)
+    blur = cv2.multiply(blur,mask)
+    sharpened = cv2.addWeighted(image,2,blur,-1,0)
+    cv2.imwrite('sharp.png',sharpened)
+    # Now threshold the sharpened image.
+    thresh = cv2.adaptiveThreshold(sharpened, 255,
                                    cv2.ADAPTIVE_THRESH_MEAN_C,
                                    cv2.THRESH_BINARY,
-                                   19, 12)
-    return output
+                                   NBHD_SIZE, ADAPT_T)
+    return thresh
 
 def findSquares(image):
     squares = []
@@ -41,7 +60,6 @@ def findSquares(image):
         if len(c) == 4 and \
            0.1*edges.size <= area <= 0.9*edges.size and \
            cv2.isContourConvex(c):
-            # Omit angle check.
             squares.append(c)
     #cv2.imwrite("tmp__b.png", cdraw)
     return squares
