@@ -83,5 +83,5 @@ def rename(originalName):
 if __name__ == "__main__":
     processed = map(processImage,sys.argv[1:])
     newnames = map(rename,sys.argv[1:])
-    starmap(cv2.imwrite,zip(newnames,processed))
-
+    for n,i in zip(newnames,processed):
+	cv2.imwrite(n,i)
