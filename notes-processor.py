@@ -6,6 +6,8 @@
 import sys
 import cv2
 import numpy as np
+import os.path
+from itertools import starmap
 
 def processImage(fname):
     print "Processing %s" % fname
@@ -17,7 +19,7 @@ def processImage(fname):
                                    cv2.ADAPTIVE_THRESH_MEAN_C,
                                    cv2.THRESH_BINARY,
                                    19, 12)
-    cv2.imwrite("p_%s.png" %fname, output)
+    return output
 
 def findSquares(image):
     squares = []
@@ -73,6 +75,13 @@ def warpSheet(image):
     transform = cv2.getPerspectiveTransform(src,dest)
     return cv2.warpPerspective(image,transform,(destW,destH))
 
+def rename(originalName):
+    d,f = os.path.split(originalName)
+    f,ext = os.path.splitext(f)
+    return os.path.join(d,'p_%s.png' %f)
+
 if __name__ == "__main__":
-    map(processImage,sys.argv[1:])
+    processed = map(processImage,sys.argv[1:])
+    newnames = map(rename,sys.argv[1:])
+    starmap(cv2.imwrite,zip(newnames,processed))
 
