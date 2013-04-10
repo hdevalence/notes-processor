@@ -24,3 +24,11 @@ Todo
 3.  The output is saved as an 8bit greyscale png, when it is
     really only 1bit data.
 
+Creating PDFs
+-------------
+
+You can create a PDF from the processed images using Graphicsmagick:
+
+    gm convert p_*.png document.pdf
+
+
