@@ -7,6 +7,7 @@ import sys
 import cv2
 import numpy as np
 import os.path
+import multiprocessing
 from itertools import starmap
 
 NBHD_SIZE = 19
@@ -103,7 +104,8 @@ def rename(originalName):
     return os.path.join(d,'p_%s.png' %f)
 
 if __name__ == "__main__":
-    processed = map(processImage,sys.argv[1:])
+    pool = multiprocessing.Pool()
+    processed = pool.map(processImage,sys.argv[1:])
     newnames = map(rename,sys.argv[1:])
     for n,i in zip(newnames,processed):
 	cv2.imwrite(n,i)
