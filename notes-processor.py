@@ -14,6 +14,7 @@ NBHD_SIZE = 19
 UNSHARP_T = 48
 ADAPT_T   = 24
 INVERT = False
+ASPECT = 8.5/11.0
 
 def processImage(fname):
     print "Processing %s" % fname
@@ -90,9 +91,9 @@ def warpSheet(image):
     b_l = np.argmax(d)
     #Now assemble these together
     if h >= w:
-        destH, destW = h, int(h*8.5/11.0)
+        destH, destW = h, int(h*ASPECT)
     else:
-        destW, destH = h, int(h*8.5/11.0)
+        destW, destH = h, int(h*ASPECT)
     dest = np.zeros(src.shape,dtype='float32')
     dest[t_l] = np.array([0,0])
     dest[t_r] = np.array([destW,0])
