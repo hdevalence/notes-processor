@@ -13,10 +13,13 @@ from itertools import starmap
 NBHD_SIZE = 19
 UNSHARP_T = 48
 ADAPT_T   = 24
+INVERT = False
 
 def processImage(fname):
     print "Processing %s" % fname
     source = cv2.imread(fname,cv2.CV_LOAD_IMAGE_GRAYSCALE)
+    if INVERT:
+	source = 255 - source
     return bitone(warpSheet(source))
 
 def bitone(image):
@@ -104,8 +107,17 @@ def rename(originalName):
     return os.path.join(d,'p_%s.png' %f)
 
 if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print "Usage: notes-processor.py [-i] files"
+        print "-i inverts images."
+    else:
+	if sys.argv[1] == "-i":
+	    INVERT = True
+	    files = sys.argv[2:]
+        else:
+            files = sys.argv[1:]
     pool = multiprocessing.Pool()
-    processed = pool.map(processImage,sys.argv[1:])
-    newnames = map(rename,sys.argv[1:])
+    processed = pool.map(processImage,files)
+    newnames = map(rename,files)
     for n,i in zip(newnames,processed):
 	cv2.imwrite(n,i)
